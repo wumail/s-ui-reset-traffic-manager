@@ -1,0 +1,103 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/robfig/cron/v3"
+	_ "modernc.org/sqlite"
+)
+
+const defaultDBPath = "/usr/local/s-ui/db/s-ui.db"
+
+// resetTrafficDB 执行实际的数据库更新操作
+func resetTrafficDB() (int64, error) {
+	dbPath := os.Getenv("SUI_DB_PATH")
+	if dbPath == "" {
+		dbPath = defaultDBPath
+	}
+
+	// 检查数据库文件是否存在
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		return 0, fmt.Errorf("database file not found: %s", dbPath)
+	}
+
+	// 打开数据库
+	db, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		return 0, fmt.Errorf("error opening database: %v", err)
+	}
+	defer db.Close()
+
+	// 执行更新操作
+	query := "UPDATE clients SET up = 0, down = 0"
+	result, err := db.Exec(query)
+	if err != nil {
+		return 0, fmt.Errorf("error executing update: %v", err)
+	}
+
+	return result.RowsAffected()
+}
+
+// resetTrafficHandler 处理手动触发的 HTTP 请求
+func resetTrafficHandler(w http.ResponseWriter, r *http.Request) {
+	rowsAffected, err := resetTrafficDB()
+	if err != nil {
+		log.Printf("[HTTP] Reset failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("[HTTP] Successfully reset traffic for %d clients", rowsAffected)
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, `{"status": "success", "message": "Traffic reset successfully", "rows_affected": %d}`, rowsAffected)
+}
+
+func main() {
+	// 1. 设置定时任务 (东八区)
+	shanghai, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		log.Printf("Warning: Could not load Asia/Shanghai, defaulting to UTC+8 offset. Error: %v", err)
+		shanghai = time.FixedZone("CST", 8*3600)
+	}
+
+	// 使用 Location 创建 cron 实例
+	c := cron.New(cron.WithLocation(shanghai))
+
+	// 每月 1 号 00:00 执行
+	// 表达式: 分 时 日 月 周
+	_, err = c.AddFunc("0 0 1 * *", func() {
+		log.Printf("[Cron] Starting monthly traffic reset...")
+		rows, err := resetTrafficDB()
+		if err != nil {
+			log.Printf("[Cron] Error during scheduled reset: %v", err)
+		} else {
+			log.Printf("[Cron] Scheduled reset completed. Affected rows: %d", rows)
+		}
+	})
+	if err != nil {
+		log.Fatalf("Error adding cron job: %v", err)
+	}
+
+	c.Start()
+	log.Printf("Cron job started (Asia/Shanghai). Scheduled for the 1st of every month at 00:00.")
+
+	// 2. 注册 HTTP 接口（供手动触发或状态查询）
+	http.HandleFunc("/api/traffic/reset", resetTrafficHandler)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "52893"
+	}
+
+	log.Printf("Server starting on 127.0.0.1:%s...", port)
+	log.Printf("Manual reset endpoint: http://127.0.0.1:%s/api/traffic/reset", port)
+
+	if err = http.ListenAndServe("127.0.0.1:"+port, nil); err != nil {
+		log.Fatalf("Server failed: %v", err)
+	}
+}
