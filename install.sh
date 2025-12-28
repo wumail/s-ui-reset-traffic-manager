@@ -57,7 +57,7 @@ EOF
     echo "Installation successful!"
     echo "Service Status: $(systemctl is-active $SERVICE_NAME)"
     echo "To check logs, use: journalctl -u $SERVICE_NAME -f"
-    echo "HTTP API is now running (default port 8080)."
+    echo "HTTP API is now running (default port 52893)."
 }
 
 uninstall_service() {
