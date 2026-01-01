@@ -46,6 +46,10 @@ curl -fsSL https://raw.githubusercontent.com/itning/reset-s-ui-traffic/master/de
 
 ### 2. 手动安装
 
+如果你希望从源码构建或已经下载了二进制文件：
+
+#### 选项 A: 从源码编译
+
 请确保已安装 [Go](https://golang.org/dl/)。
 
 ```bash
@@ -54,11 +58,10 @@ git clone https://github.com/itning/reset-s-ui-traffic.git
 cd reset-s-ui-traffic
 
 # 为你的平台编译 (例如 Linux AMD64)
-# 你也可以在 Windows 上使用 build.ps1 脚本
 $env:GOOS="linux"; $env:GOARCH="amd64"; $env:CGO_ENABLED=0; go build -o reset-traffic main.go
 ```
 
-### 2. 部署到 Linux 服务器
+#### 选项 B: 使用本地二进制部署
 
 1. 将编译好的二进制文件和 `install.sh` 上传到服务器。
 2. 运行安装脚本：

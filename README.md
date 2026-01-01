@@ -46,6 +46,10 @@ curl -fsSL https://raw.githubusercontent.com/itning/reset-s-ui-traffic/master/de
 
 ### 2. Manual Installation
 
+If you prefer to build from source or have already downloaded the binary:
+
+#### Option A: Build from Source
+
 Ensure you have [Go](https://golang.org/dl/) installed.
 
 ```bash
@@ -54,13 +58,12 @@ git clone https://github.com/itning/reset-s-ui-traffic.git
 cd reset-s-ui-traffic
 
 # Build for your platform (e.g., Linux AMD64)
-# You can also use the build.ps1 script on Windows
 GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o reset-traffic main.go
 ```
 
-### 2. Deploy to Linux Server
+#### Option B: Deploy with local binary
 
-1. Upload the compiled binary and `install.sh` to your server.
+1. Upload your compiled binary and `install.sh` to your server.
 2. Run the installation script:
 
 ```bash
