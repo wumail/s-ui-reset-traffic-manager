@@ -33,14 +33,28 @@ func resetTrafficDB() (int64, error) {
 	}
 	defer db.Close()
 
-	// 执行更新操作
-	query := "UPDATE clients SET up = 0, down = 0"
-	result, err := db.Exec(query)
-	if err != nil {
-		return 0, fmt.Errorf("error executing update: %v", err)
+	// 设置 SQLite 内部的忙等待超时（双重保险）
+	_, _ = db.Exec("PRAGMA busy_timeout = 5000;")
+
+	var lastErr error
+	// 重试 5 次
+	for i := 1; i <= 5; i++ {
+		// 执行更新操作
+		query := "UPDATE clients SET up = 0, down = 0"
+		result, err := db.Exec(query)
+		if err == nil {
+			return result.RowsAffected()
+		}
+
+		lastErr = err
+		log.Printf("[DB] Attempt %d failed: %v. Retrying in 5 seconds...", i, err)
+
+		if i < 5 {
+			time.Sleep(5 * time.Second)
+		}
 	}
 
-	return result.RowsAffected()
+	return 0, fmt.Errorf("error executing update after 5 attempts: %v", lastErr)
 }
 
 // resetTrafficHandler 处理手动触发的 HTTP 请求
