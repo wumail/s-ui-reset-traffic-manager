@@ -36,7 +36,15 @@
 
 ## 安装
 
-### 1. 从源码编译
+### 1. 一键安装 (推荐)
+
+在你的 Linux 服务器上运行以下命令，即可自动下载最新版本并安装为 systemd 服务：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/itning/reset-s-ui-traffic/master/deploy.sh | sudo bash -s install
+```
+
+### 2. 手动安装
 
 请确保已安装 [Go](https://golang.org/dl/)。
 

@@ -36,7 +36,15 @@ A simple tool to reset traffic statistics (upload/download) for the `s-ui` panel
 
 ## Installation
 
-### 1. Build from Source
+### 1. One-Click Installation (Recommended)
+
+Run the following command on your Linux server to automatically download the latest version and install it as a systemd service:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/itning/reset-s-ui-traffic/master/deploy.sh | sudo bash -s install
+```
+
+### 2. Manual Installation
 
 Ensure you have [Go](https://golang.org/dl/) installed.
 
