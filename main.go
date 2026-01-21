@@ -13,6 +13,7 @@ import (
 )
 
 const defaultDBPath = "/usr/local/s-ui/db/s-ui.db"
+const defaultCronSchedule = "0 0 1 * *" // 每月 1 号 00:00
 
 // resetTrafficDB 执行实际的数据库更新操作
 func resetTrafficDB() (int64, error) {
@@ -82,10 +83,19 @@ func main() {
 	// 使用 Location 创建 cron 实例
 	c := cron.New(cron.WithLocation(shanghai))
 
-	// 每月 1 号 00:00 执行
-	// 表达式: 分 时 日 月 周
-	_, err = c.AddFunc("0 0 1 * *", func() {
-		log.Printf("[Cron] Starting monthly traffic reset...")
+	// 获取 cron 表达式配置
+	cronSchedule := os.Getenv("CRON_SCHEDULE")
+	if cronSchedule == "" {
+		cronSchedule = defaultCronSchedule
+		log.Printf("CRON_SCHEDULE not set, using default: %s", cronSchedule)
+	} else {
+		log.Printf("Using custom CRON_SCHEDULE: %s", cronSchedule)
+	}
+
+	// 添加定时任务
+	// 表达式格式: 分 时 日 月 周
+	_, err = c.AddFunc(cronSchedule, func() {
+		log.Printf("[Cron] Starting scheduled traffic reset...")
 		rows, err := resetTrafficDB()
 		if err != nil {
 			log.Printf("[Cron] Error during scheduled reset: %v", err)
@@ -94,11 +104,11 @@ func main() {
 		}
 	})
 	if err != nil {
-		log.Fatalf("Error adding cron job: %v", err)
+		log.Fatalf("Error adding cron job (schedule: %s): %v", cronSchedule, err)
 	}
 
 	c.Start()
-	log.Printf("Cron job started (Asia/Shanghai). Scheduled for the 1st of every month at 00:00.")
+	log.Printf("Cron job started (Asia/Shanghai). Schedule: %s", cronSchedule)
 
 	// 2. 注册 HTTP 接口（供手动触发或状态查询）
 	http.HandleFunc("/api/traffic/reset", resetTrafficHandler)

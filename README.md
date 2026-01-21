@@ -103,6 +103,20 @@ You can customize the behavior using environment variables in the systemd servic
 | :--- | :--- | :--- |
 | `SUI_DB_PATH` | Path to the `s-ui.db` file | `/usr/local/s-ui/db/s-ui.db` |
 | `PORT` | Listening port for the HTTP API | `52893` |
+| `CRON_SCHEDULE` | Cron expression for scheduled task (format: minute hour day month weekday) | `0 0 1 * *` (1st of month at 00:00) |
+
+### Cron Expression Examples
+
+| Expression | Description |
+| :--- | :--- |
+| `0 0 1 * *` | 1st of every month at 00:00 (default) |
+| `0 0 * * 0` | Every Sunday at 00:00 |
+| `0 0 * * 1` | Every Monday at 00:00 |
+| `0 0 15 * *` | 15th of every month at 00:00 |
+| `0 2 1 * *` | 1st of every month at 02:00 |
+| `0 0 1 */3 *` | 1st day of every 3 months at 00:00 |
+
+**Note**: All times are based on Asia/Shanghai timezone (UTC+8).
 
 ## License
 
