@@ -5,7 +5,7 @@
 
 set -e
 
-SCRIPT_VERSION="1.0.2"
+SCRIPT_VERSION="1.0.3"
 REPO="wumail/s-ui-reset-traffic-manager"
 
 SCRIPT_INSTALL_PATH="/usr/local/bin/reset-traffic-sui"

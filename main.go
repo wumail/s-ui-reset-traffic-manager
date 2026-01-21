@@ -20,14 +20,14 @@ const resetLogPath = "/usr/local/s-ui/logs/reset-traffic.log"
 func logReset(resetType string, rowsAffected int64, err error) {
 	// 确保日志目录存在
 	logDir := "/usr/local/s-ui/logs"
-	if err := os.MkdirAll(logDir, 0755); err != nil {
-		log.Printf("Warning: Could not create log directory: %v", err)
+	if mkdirErr := os.MkdirAll(logDir, 0755); mkdirErr != nil {
+		log.Printf("ERROR: Failed to create log directory %s: %v", logDir, mkdirErr)
 		return
 	}
 
 	logFile, fileErr := os.OpenFile(resetLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if fileErr != nil {
-		log.Printf("Warning: Could not open log file: %v", fileErr)
+		log.Printf("ERROR: Failed to open log file %s: %v", resetLogPath, fileErr)
 		return
 	}
 	defer logFile.Close()
@@ -41,9 +41,13 @@ func logReset(resetType string, rowsAffected int64, err error) {
 	}
 
 	logLine := fmt.Sprintf("[%s] 重置方式: %s, 状态: %s\n", timestamp, resetType, status)
-	if _, err := logFile.WriteString(logLine); err != nil {
-		log.Printf("Warning: Could not write to log file: %v", err)
+	if _, writeErr := logFile.WriteString(logLine); writeErr != nil {
+		log.Printf("ERROR: Failed to write to log file %s: %v", resetLogPath, writeErr)
+		return
 	}
+
+	// 确认日志写入成功
+	log.Printf("Log written successfully to %s", resetLogPath)
 }
 
 // resetTrafficDB 执行实际的数据库更新操作

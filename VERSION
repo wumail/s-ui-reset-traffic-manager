@@ -1,6 +1,19 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.3",
   "releases": [
+    {
+      "version": "1.0.3",
+      "changelog": [
+        "Improve: Enhanced error logging for log file creation with detailed error messages",
+        "Improve: Change log level from Warning to ERROR for better visibility",
+        "Improve: Add success confirmation message when log is written successfully",
+        "Improve: Increase network timeout from 1.5s to 5s for better compatibility",
+        "Improve: Remove automatic version check from main menu for faster startup",
+        "Improve: Version check now only happens when user selects update option",
+        "Fix: Improve error handling with detailed path information in log messages",
+        "Fix: Avoid variable name conflicts in logReset function"
+      ]
+    },
     {
       "version": "1.0.2",
       "changelog": [
