@@ -36,12 +36,19 @@ A simple tool to reset traffic statistics (upload/download) for the `s-ui` panel
 
 ## Installation
 
-### 1. One-Click Installation (Recommended)
+### 1. One-Click Deployment (Recommended)
 
-Run the following command on your Linux server to automatically download the latest version and install it as a systemd service:
+Run the following command on your Linux server to download the management tool:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/itning/reset-s-ui-traffic/master/deploy.sh | sudo bash -s install
+curl -fsSL https://raw.githubusercontent.com/wumail/reset-s-ui-traffic/master/deploy.sh | sudo bash
+```
+
+Then run the management tool to install the service:
+
+```bash
+sudo reset-traffic-sui
+# Select option 1 to install
 ```
 
 ### 2. Manual Installation
@@ -75,22 +82,25 @@ Follow the menu prompts to install the service. The script will create a systemd
 
 ## Usage
 
-### Configuration Management Script
+### Management Tool
 
-After installation, you can use the interactive configuration script to manage the service:
+After installation, you can use the `reset-traffic-sui` management tool:
 
 ```bash
-sudo reset-traffic-config
+sudo reset-traffic-sui
 ```
 
-**Configuration Options:**
-- **Option 1**: Modify SUI database path
-- **Option 2**: Modify HTTP API port
-- **Option 3**: Modify cron expression for scheduled tasks
-- **Option 4**: Manually trigger traffic reset
+**Available Options:**
+- **Option 1**: Install reset-traffic service (downloads latest version from GitHub)
+- **Option 2**: Update reset-traffic service
+- **Option 3**: Uninstall reset-traffic service
+- **Option 4**: Modify SUI database path
+- **Option 5**: Modify HTTP API port
+- **Option 6**: Modify cron expression for scheduled tasks
+- **Option 7**: Manually trigger traffic reset
 - **Option 0**: Exit (automatically restarts service if configuration changed)
 
-Each option supports entering `0` to return to the main menu.
+All options support entering `0` to return to the main menu.
 
 ### HTTP API
 

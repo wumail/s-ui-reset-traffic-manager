@@ -14,6 +14,30 @@ import (
 
 const defaultDBPath = "/usr/local/s-ui/db/s-ui.db"
 const defaultCronSchedule = "0 0 1 * *" // 每月 1 号 00:00
+const resetLogPath = "/var/log/reset-traffic.log"
+
+// logReset 记录重置日志
+func logReset(resetType string, rowsAffected int64, err error) {
+	logFile, fileErr := os.OpenFile(resetLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if fileErr != nil {
+		log.Printf("Warning: Could not open log file: %v", fileErr)
+		return
+	}
+	defer logFile.Close()
+
+	timestamp := time.Now().Format("2006-01-02 15:04:05")
+	var status string
+	if err != nil {
+		status = fmt.Sprintf("失败 - %v", err)
+	} else {
+		status = fmt.Sprintf("成功 - 影响 %d 条记录", rowsAffected)
+	}
+
+	logLine := fmt.Sprintf("[%s] 重置方式: %s, 状态: %s\n", timestamp, resetType, status)
+	if _, err := logFile.WriteString(logLine); err != nil {
+		log.Printf("Warning: Could not write to log file: %v", err)
+	}
+}
 
 // resetTrafficDB 执行实际的数据库更新操作
 func resetTrafficDB() (int64, error) {
@@ -63,11 +87,13 @@ func resetTrafficHandler(w http.ResponseWriter, r *http.Request) {
 	rowsAffected, err := resetTrafficDB()
 	if err != nil {
 		log.Printf("[HTTP] Reset failed: %v", err)
+		logReset("手动", 0, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	log.Printf("[HTTP] Successfully reset traffic for %d clients", rowsAffected)
+	logReset("手动", rowsAffected, nil)
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintf(w, `{"status": "success", "message": "Traffic reset successfully", "rows_affected": %d}`, rowsAffected)
 }
@@ -99,8 +125,10 @@ func main() {
 		rows, err := resetTrafficDB()
 		if err != nil {
 			log.Printf("[Cron] Error during scheduled reset: %v", err)
+			logReset("自动", 0, err)
 		} else {
 			log.Printf("[Cron] Scheduled reset completed. Affected rows: %d", rows)
+			logReset("自动", rows, nil)
 		}
 	})
 	if err != nil {

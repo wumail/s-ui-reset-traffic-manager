@@ -36,12 +36,19 @@
 
 ## 安装
 
-### 1. 一键安装 (推荐)
+### 1. 一键部署 (推荐)
 
-在你的 Linux 服务器上运行以下命令，即可自动下载最新版本并安装为 systemd 服务：
+在你的 Linux 服务器上运行以下命令，会自动下载管理工具:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/itning/reset-s-ui-traffic/master/deploy.sh | sudo bash -s install
+curl -fsSL https://raw.githubusercontent.com/wumail/reset-s-ui-traffic/master/deploy.sh | sudo bash
+```
+
+然后运行管理工具进行安装:
+
+```bash
+sudo reset-traffic-sui
+# 选择选项 1 进行安装
 ```
 
 ### 2. 手动安装
@@ -75,22 +82,25 @@ sudo ./install.sh
 
 ## 使用方法
 
-### 配置管理脚本
+### 管理工具
 
-安装后,可以使用交互式配置脚本来管理服务:
+安装后,可以使用 `reset-traffic-sui` 管理工具来管理服务:
 
 ```bash
-sudo reset-traffic-config
+sudo reset-traffic-sui
 ```
 
-**配置选项:**
-- **选项 1**: 修改 SUI 数据库路径
-- **选项 2**: 修改 HTTP API 端口
-- **选项 3**: 修改定时任务 Cron 表达式
-- **选项 4**: 手动重置流量
+**功能选项:**
+- **选项 1**: 安装 reset-traffic 服务 (从 GitHub 下载最新版本)
+- **选项 2**: 更新 reset-traffic 服务
+- **选项 3**: 卸载 reset-traffic 服务
+- **选项 4**: 修改 SUI 数据库路径
+- **选项 5**: 修改 HTTP API 端口
+- **选项 6**: 修改定时任务 Cron 表达式
+- **选项 7**: 手动重置流量
 - **选项 0**: 退出 (如果配置有变化会自动重启服务)
 
-每个选项都支持输入 `0` 返回主菜单。
+所有选项都支持输入 `0` 返回主菜单。
 
 ### HTTP API
 
@@ -157,7 +167,7 @@ sudo reset-traffic-config
 2. 提交并推送到 master 分支:
 
 ```bash
-git add VERSION
+git add .
 git commit -m "chore: bump version to 1.1.0"
 git push origin master
 ```
