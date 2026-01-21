@@ -14,10 +14,17 @@ import (
 
 const defaultDBPath = "/usr/local/s-ui/db/s-ui.db"
 const defaultCronSchedule = "0 0 1 * *" // 每月 1 号 00:00
-const resetLogPath = "/var/log/reset-traffic.log"
+const resetLogPath = "/usr/local/s-ui/logs/reset-traffic.log"
 
 // logReset 记录重置日志
 func logReset(resetType string, rowsAffected int64, err error) {
+	// 确保日志目录存在
+	logDir := "/usr/local/s-ui/logs"
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		log.Printf("Warning: Could not create log directory: %v", err)
+		return
+	}
+
 	logFile, fileErr := os.OpenFile(resetLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if fileErr != nil {
 		log.Printf("Warning: Could not open log file: %v", fileErr)

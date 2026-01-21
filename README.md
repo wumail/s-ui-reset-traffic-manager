@@ -100,6 +100,8 @@ sudo reset-traffic-sui
 
 All options support entering `0` to return to the main menu.
 
+**Log File Location**: Reset logs are stored at `/usr/local/s-ui/logs/reset-traffic.log`. The log directory is automatically created when the service first writes a log entry.
+
 ### HTTP API
 
 The service listens on `127.0.0.1:52893` by default. You can manually trigger a reset by sending a request to the following endpoint:

@@ -502,7 +502,7 @@ option_view_logs() {
     echo -e "${BLUE}=== 查看重置日志 ===${NC}"
     echo ""
     
-    LOG_FILE="/var/log/reset-traffic.log"
+    LOG_FILE="/usr/local/s-ui/logs/reset-traffic.log"
     
     if [ ! -f "$LOG_FILE" ]; then
         echo -e "${YELLOW}暂无重置日志${NC}"
