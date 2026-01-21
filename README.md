@@ -88,14 +88,24 @@ sudo reset-traffic-sui
 ```
 
 **Available Options:**
+
+**[Service Management]**
 - **Option 1**: Install reset-traffic service (downloads latest version from GitHub)
 - **Option 2**: Update reset-traffic service
 - **Option 3**: Uninstall reset-traffic service
-- **Option 4**: Modify SUI database path
-- **Option 5**: Modify HTTP API port
-- **Option 6**: Modify cron expression for scheduled tasks
-- **Option 7**: Manually trigger traffic reset
-- **Option 8**: View reset logs (shows timestamp and reset type: manual/automatic)
+- **Option 4**: Pause reset-traffic service
+- **Option 5**: Resume reset-traffic service
+
+**[Configuration Management]**
+- **Option 6**: Modify SUI database path
+- **Option 7**: Modify HTTP API port
+- **Option 8**: Modify cron expression for scheduled tasks
+
+**[Operations]**
+- **Option 9**: Manually trigger traffic reset
+- **Option 10**: View reset logs (shows timestamp and reset type: manual/automatic)
+- **Option 11**: Update management script to latest version
+
 - **Option 0**: Exit (automatically restarts service if configuration changed)
 
 All options support entering `0` to return to the main menu.

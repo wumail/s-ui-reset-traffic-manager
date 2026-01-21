@@ -1,6 +1,21 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "releases": [
+    {
+      "version": "1.0.2",
+      "changelog": [
+        "Fix: Change log file path from /var/log to /usr/local/s-ui/logs for better accessibility",
+        "Fix: Add automatic log directory creation to ensure logs are written successfully",
+        "Add: Script version management with automatic update checking from GitHub Release API",
+        "Add: Service pause and resume functionality for better service control",
+        "Add: Self-update feature for management script (option 11)",
+        "Improve: Reorganize menu with 4 categories (Service/Config/Operations/Other)",
+        "Improve: Update menu options from 1-9 to 1-11 with clearer organization",
+        "Improve: Use GitHub Release API for version checking instead of file parsing",
+        "Improve: Add timeout control (1.5s) for version checking to prevent blocking",
+        "Docs: Update README with new menu structure and features"
+      ]
+    },
     {
       "version": "1.0.1",
       "changelog": [

@@ -5,10 +5,13 @@
 
 set -e
 
+SCRIPT_VERSION="1.0.2"
+REPO="wumail/s-ui-reset-traffic-manager"
+
+SCRIPT_INSTALL_PATH="/usr/local/bin/reset-traffic-sui"
 SERVICE_NAME="reset-traffic"
 INSTALL_PATH="/usr/local/bin/$SERVICE_NAME"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
-REPO="wumail/s-ui-reset-traffic-manager"
 CONFIG_CHANGED=false
 
 # 颜色定义
@@ -107,6 +110,7 @@ show_menu() {
     clear
     echo -e "${BLUE}====================================${NC}"
     echo -e "${BLUE}  Reset S-UI Traffic 管理工具${NC}"
+    echo -e "${BLUE}  版本: v${SCRIPT_VERSION}${NC}"
     echo -e "${BLUE}====================================${NC}"
     echo ""
     
@@ -125,20 +129,31 @@ show_menu() {
     
     echo ""
     echo "请选择操作:"
+    echo ""
+    echo -e "------${GREEN}[服务管理]${NC}------"
     echo "  1. 安装 reset-traffic 服务"
     echo "  2. 更新 reset-traffic 服务"
     echo "  3. 卸载 reset-traffic 服务"
-    echo "  4. 修改 SUI 数据库路径"
-    echo "  5. 修改 HTTP API 端口"
-    echo "  6. 修改定时任务 Cron 表达式"
-    echo "  7. 手动重置流量"
-    echo "  8. 查看重置日志"
+    echo "  4. 暂停 reset-traffic 服务"
+    echo "  5. 启动 reset-traffic 服务"
+    echo ""
+    echo -e "------${GREEN}[配置管理]${NC}------"
+    echo "  6. 修改 SUI 数据库路径"
+    echo "  7. 修改 HTTP API 端口"
+    echo "  8. 修改定时任务 Cron 表达式"
+    echo ""
+    echo -e "------${GREEN}[操作功能]${NC}------"
+    echo "  9. 手动重置流量"
+    echo " 10. 查看重置日志"
+    echo ""
+    echo " 11. 更新脚本"
+    echo "" 
     echo "  0. 退出"
     echo ""
-    echo -n "请输入选项 [0-8]: "
+    echo -n "请输入选项 [0-11]: "
 }
 
-# 选项 1: 安装服务
+# 安装服务
 option_install_service() {
     clear
     echo -e "${BLUE}=== 安装 reset-traffic 服务 ===${NC}"
@@ -223,7 +238,7 @@ EOF
     read
 }
 
-# 选项 2: 更新服务
+# 更新服务
 option_update_service() {
     clear
     echo -e "${BLUE}=== 更新 reset-traffic 服务 ===${NC}"
@@ -291,7 +306,7 @@ option_update_service() {
     read
 }
 
-# 选项 3: 卸载服务
+# 卸载服务
 option_uninstall_service() {
     clear
     echo -e "${BLUE}=== 卸载 reset-traffic 服务 ===${NC}"
@@ -336,7 +351,70 @@ option_uninstall_service() {
     read
 }
 
-# 选项 4: 修改数据库路径
+# 暂停服务
+option_pause_service() {
+    clear
+    echo -e "${BLUE}=== 暂停 reset-traffic 服务 ===${NC}"
+    echo ""
+    
+    if [ ! -f "$SERVICE_FILE" ]; then
+        echo -e "${RED}错误: 服务未安装${NC}"
+        sleep 2
+        return
+    fi
+    
+    local status=$(systemctl is-active $SERVICE_NAME 2>/dev/null || echo "未运行")
+    if [ "$status" != "active" ]; then
+        echo -e "${YELLOW}服务当前未运行${NC}"
+        sleep 2
+        return
+    fi
+    
+    echo "正在暂停服务..."
+    if systemctl stop "$SERVICE_NAME"; then
+        echo -e "${GREEN}✓ 服务已暂停${NC}"
+    else
+        echo -e "${RED}✗ 暂停服务失败${NC}"
+    fi
+    
+    echo ""
+    echo -n "按回车键返回..."
+    read
+}
+
+# 启动服务
+option_resume_service() {
+    clear
+    echo -e "${BLUE}=== 启动 reset-traffic 服务 ===${NC}"
+    echo ""
+    
+    if [ ! -f "$SERVICE_FILE" ]; then
+        echo -e "${RED}错误: 服务未安装${NC}"
+        sleep 2
+        return
+    fi
+    
+    local status=$(systemctl is-active $SERVICE_NAME 2>/dev/null || echo "未运行")
+    if [ "$status" = "active" ]; then
+        echo -e "${YELLOW}服务已在运行中${NC}"
+        sleep 2
+        return
+    fi
+    
+    echo "正在启动服务..."
+    if systemctl start "$SERVICE_NAME"; then
+        echo -e "${GREEN}✓ 服务已启动${NC}"
+    else
+        echo -e "${RED}✗ 启动服务失败${NC}"
+        systemctl status "$SERVICE_NAME" --no-pager
+    fi
+    
+    echo ""
+    echo -n "按回车键返回..."
+    read
+}
+
+# 修改数据库路径
 option_modify_db_path() {
     clear
     echo -e "${BLUE}=== 修改 SUI 数据库路径 ===${NC}"
@@ -377,7 +455,7 @@ option_modify_db_path() {
     sleep 2
 }
 
-# 选项 5: 修改 HTTP 端口
+# 修改 HTTP 端口
 option_modify_port() {
     clear
     echo -e "${BLUE}=== 修改 HTTP API 端口 ===${NC}"
@@ -409,7 +487,7 @@ option_modify_port() {
     sleep 2
 }
 
-# 选项 6: 修改 Cron 表达式
+# 修改 Cron 表达式
 option_modify_cron() {
     clear
     echo -e "${BLUE}=== 修改定时任务 Cron 表达式 ===${NC}"
@@ -453,7 +531,7 @@ option_modify_cron() {
     sleep 2
 }
 
-# 选项 7: 手动重置流量
+# 手动重置流量
 option_manual_reset() {
     clear
     echo -e "${BLUE}=== 手动重置流量 ===${NC}"
@@ -496,7 +574,7 @@ option_manual_reset() {
     read
 }
 
-# 选项 8: 查看重置日志
+# 查看重置日志
 option_view_logs() {
     clear
     echo -e "${BLUE}=== 查看重置日志 ===${NC}"
@@ -522,6 +600,82 @@ option_view_logs() {
     echo ""
     echo -n "按回车键返回..."
     read
+}
+
+# 获取最新脚本版本
+get_latest_script_version() {
+    local latest_version=$(curl -s --max-time 5 --connect-timeout 1 \
+        -H "Accept: application/vnd.github.v3+json" \
+        -H "Cache-Control: no-cache, no-store, must-revalidate" \
+        "https://api.github.com/repos/$REPO/releases/latest" \
+        2>/dev/null | grep '"tag_name"' | head -1 | cut -d'"' -f4 | sed 's/^v//')
+    echo "$latest_version"
+}
+
+# 更新脚本
+option_update_script() {
+    clear
+    echo -e "${BLUE}=== 更新管理脚本 ===${NC}"
+    echo ""
+    
+    echo "当前版本: v${SCRIPT_VERSION}"
+    echo "正在检查最新版本..."
+    echo ""
+    
+    latest_version=$(get_latest_script_version 2>/dev/null)
+    
+    if [ -z "$latest_version" ]; then
+        echo -e "${RED}错误: 无法获取最新版本信息${NC}"
+        sleep 3
+        return
+    fi
+    
+    echo -e "最新版本: ${GREEN}v${latest_version}${NC}"
+    echo ""
+    
+    if [ "$latest_version" = "$SCRIPT_VERSION" ]; then
+        echo -e "${GREEN}✓ 已是最新版本${NC}"
+        sleep 2
+        return
+    fi
+    
+    echo -n "确认更新到 v${latest_version}? (y/n, 输入 0 返回): "
+    read confirm
+    if [ "$confirm" = "0" ]; then
+        return
+    fi
+    if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
+        return
+    fi
+    
+    echo ""
+    echo "正在下载最新版本..."
+    
+    TMP_SCRIPT="/tmp/reset-traffic-sui.sh"
+    DOWNLOAD_URL="https://raw.githubusercontent.com/$REPO/master/reset-traffic-sui.sh"
+    
+    if ! curl -fsSL "$DOWNLOAD_URL" -o "$TMP_SCRIPT"; then
+        echo -e "${RED}错误: 下载失败${NC}"
+        sleep 3
+        return
+    fi
+    
+    if [ ! -s "$TMP_SCRIPT" ]; then
+        echo -e "${RED}错误: 下载的文件为空${NC}"
+        sleep 3
+        return
+    fi
+    
+    echo "正在安装..."
+    chmod +x "$TMP_SCRIPT"
+    mv "$TMP_SCRIPT" "$SCRIPT_INSTALL_PATH"
+    
+    echo ""
+    echo -e "${GREEN}✓ 更新成功! 脚本将重新启动...${NC}"
+    sleep 2
+    
+    # 重新启动脚本
+    exec "$SCRIPT_INSTALL_PATH"
 }
 
 # 重启服务
@@ -562,19 +716,28 @@ main() {
                 option_uninstall_service
                 ;;
             4)
-                option_modify_db_path
+                option_pause_service
                 ;;
             5)
-                option_modify_port
+                option_resume_service
                 ;;
             6)
-                option_modify_cron
+                option_modify_db_path
                 ;;
             7)
-                option_manual_reset
+                option_modify_port
                 ;;
             8)
+                option_modify_cron
+                ;;
+            9)
+                option_manual_reset
+                ;;
+            10)
                 option_view_logs
+                ;;
+            11)
+                option_update_script
                 ;;
             0)
                 clear
