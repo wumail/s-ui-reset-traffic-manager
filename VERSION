@@ -1,6 +1,15 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "releases": [
+    {
+      "version": "1.0.1",
+      "changelog": [
+        "Fix: Change log file path from /var/log to /usr/local/s-ui/logs for better accessibility",
+        "Fix: Add automatic log directory creation to ensure logs are written successfully",
+        "Improve: Update management script to reference new log file location",
+        "Docs: Add log file location information to README"
+      ]
+    },
     {
       "version": "1.0.0",
       "changelog": [
