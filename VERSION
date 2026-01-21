@@ -1,12 +1,23 @@
 {
   "version": "1.0.0",
-  "changelog": [
-    "Initial release with automated monthly traffic reset",
-    "Support for configurable cron schedule via CRON_SCHEDULE environment variable",
-    "HTTP API for manual traffic reset",
-    "Interactive configuration script (reset-traffic-config)",
-    "Support for custom database path and HTTP port configuration",
-    "Pure Go implementation with no CGO dependencies",
-    "Systemd service integration for Linux"
+  "releases": [
+    {
+      "version": "1.0.0",
+      "changelog": [
+        "Based on https://github.com/itning/reset-s-ui-traffic",
+        "Initial release of S-UI Traffic Reset Manager",
+        "Add: Interactive management tool (reset-traffic-sui) with 8 menu options",
+        "Add: Install/update/uninstall service capabilities",
+        "Add: Automated scheduled traffic reset with configurable cron expression",
+        "Add: Manual traffic reset via HTTP API",
+        "Add: Interactive configuration management (database path, port, cron schedule)",
+        "Add: Reset log viewer with timestamp and reset type tracking",
+        "Add: One-click deployment script",
+        "Feature: Pure Go implementation with no CGO dependencies",
+        "Feature: Cross-platform support (Windows, Linux, macOS)",
+        "Feature: Systemd service integration for Linux",
+        "Docs: Comprehensive README in English and Chinese"
+      ]
+    }
   ]
 }

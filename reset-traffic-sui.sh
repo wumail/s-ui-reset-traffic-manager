@@ -8,7 +8,7 @@ set -e
 SERVICE_NAME="reset-traffic"
 INSTALL_PATH="/usr/local/bin/$SERVICE_NAME"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
-REPO="wumail/reset-s-ui-traffic"
+REPO="wumail/s-ui-reset-traffic-manager"
 CONFIG_CHANGED=false
 
 # 颜色定义

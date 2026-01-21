@@ -1,24 +1,9 @@
 <h3 align="center">Reset S-UI Traffic</h3>
-<div align="center">
-
-[![GitHub stars](https://img.shields.io/github/stars/itning/reset-s-ui-traffic.svg?style=social&label=Stars)](https://github.com/itning/reset-s-ui-traffic/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/itning/reset-s-ui-traffic.svg?style=social&label=Fork)](https://github.com/itning/reset-s-ui-traffic/network/members)
-[![GitHub watchers](https://img.shields.io/github/watchers/itning/reset-s-ui-traffic.svg?style=social&label=Watch)](https://github.com/itning/reset-s-ui-traffic/watchers)
-[![GitHub followers](https://img.shields.io/github/followers/itning.svg?style=social&label=Follow)](https://github.com/itning?tab=followers)
-
-
-</div>
 
 <div align="center">
 
-[![GitHub issues](https://img.shields.io/github/issues/itning/reset-s-ui-traffic.svg)](https://github.com/itning/reset-s-ui-traffic/issues)
-[![GitHub license](https://img.shields.io/github/license/itning/reset-s-ui-traffic.svg)](https://github.com/itning/reset-s-ui-traffic/blob/master/LICENSE)
-[![GitHub last commit](https://img.shields.io/github/last-commit/itning/reset-s-ui-traffic.svg)](https://github.com/itning/reset-s-ui-traffic/commits)
-[![GitHub release](https://img.shields.io/github/release/itning/reset-s-ui-traffic.svg)](https://github.com/itning/reset-s-ui-traffic/releases)
-[![GitHub repo size in bytes](https://img.shields.io/github/repo-size/itning/reset-s-ui-traffic.svg)](https://github.com/itning/reset-s-ui-traffic)
-[![Hits](https://hitcount.itning.com?u=itning&r=reset-s-ui-traffic)](https://github.com/itning/hit-count)
-[![language](https://img.shields.io/badge/language-Go-blue.svg)](https://github.com/itning/reset-s-ui-traffic)
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/itning/reset-s-ui-traffic/total)
+[![GitHub license](https://img.shields.io/github/license/wumail/s-ui-reset-traffic-manager.svg)](https://github.com/wumail/s-ui-reset-traffic-manager/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/wumail/s-ui-reset-traffic-manager.svg)](https://github.com/wumail/s-ui-reset-traffic-manager/releases)
 
 </div>
 
@@ -27,9 +12,21 @@
 
 A simple tool to reset traffic statistics (upload/download) for the `s-ui` panel. It features both a monthly scheduled task and an HTTP API for manual triggers.
 
+## About
+
+S-UI traffic reset tool featuring:
+- ⚙️ Interactive configuration management (database path, port, cron schedule)
+- 🔄 Automated scheduled traffic reset (configurable cron expression)
+- 🖱️ Manual traffic reset via HTTP API
+- 📦 One-click install/update/uninstall service
+- 📊 Reset log viewer (tracks timestamp and reset type)
+- 🚀 Based on [itning/reset-s-ui-traffic](https://github.com/itning/reset-s-ui-traffic)
+
+---
+
 ## Features
 
-- **Automated Monthly Reset**: Automatically clears traffic for all clients on the 1st of every month at 00:00 (Asia/Shanghai).
+- **Automated Monthly Reset**: (Default) Automatically clears traffic for all clients on the 1st of every month at 00:00 (Asia/Shanghai).
 - **Manual Reset API**: Provides an HTTP endpoint to trigger the reset manually at any time.
 - **Pure Go Implementation**: Uses `modernc.org/sqlite`, so no CGO is required for compilation.
 - **Easy Deployment**: Includes a systemd installation script for Linux servers.
@@ -41,7 +38,7 @@ A simple tool to reset traffic statistics (upload/download) for the `s-ui` panel
 Run the following command on your Linux server to download the management tool:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wumail/reset-s-ui-traffic/master/deploy.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/wumail/s-ui-reset-traffic-manager/master/deploy.sh | sudo bash
 ```
 
 Then run the management tool to install the service:
@@ -61,7 +58,7 @@ Ensure you have [Go](https://golang.org/dl/) installed.
 
 ```bash
 # Clone the repository
-git clone https://github.com/itning/reset-s-ui-traffic.git
+git clone https://github.com/wumail/s-ui-reset-traffic-manager.git
 cd reset-s-ui-traffic
 
 # Build for your platform (e.g., Linux AMD64)
@@ -98,6 +95,7 @@ sudo reset-traffic-sui
 - **Option 5**: Modify HTTP API port
 - **Option 6**: Modify cron expression for scheduled tasks
 - **Option 7**: Manually trigger traffic reset
+- **Option 8**: View reset logs (shows timestamp and reset type: manual/automatic)
 - **Option 0**: Exit (automatically restarts service if configuration changed)
 
 All options support entering `0` to return to the main menu.
@@ -122,16 +120,6 @@ The service listens on `127.0.0.1:52893` by default. You can manually trigger a 
 The cron job runs automatically inside the binary. By default, it is set to:
 `0 0 1 * *` (At 00:00 on day-of-month 1).
 
-## Configuration
-
-You can customize the behavior using environment variables in the systemd service file or before running the binary:
-
-| Variable | Description | Default |
-| :--- | :--- | :--- |
-| `SUI_DB_PATH` | Path to the `s-ui.db` file | `/usr/local/s-ui/db/s-ui.db` |
-| `PORT` | Listening port for the HTTP API | `52893` |
-| `CRON_SCHEDULE` | Cron expression for scheduled task (format: minute hour day month weekday) | `0 0 1 * *` (1st of month at 00:00) |
-
 ### Cron Expression Examples
 
 | Expression | Description |
@@ -143,6 +131,8 @@ You can customize the behavior using environment variables in the systemd servic
 | `0 2 1 * *` | 1st of every month at 02:00 |
 | `0 0 1 */3 *` | 1st day of every 3 months at 00:00 |
 
+You can modify the cron expression by running `sudo reset-traffic-sui` and selecting option 6.
+
 **Note**: All times are based on Asia/Shanghai timezone (UTC+8).
 
 ## Release Process
@@ -151,15 +141,24 @@ This project uses an automated release workflow. When the `VERSION` file is upda
 
 ### Creating a New Release
 
-1. Edit the `VERSION` file to update the version number and changelog:
+1. Edit the `VERSION` file and add a new version at the beginning of the `releases` array:
 
 ```json
 {
-  "version": "1.1.0",
-  "changelog": [
-    "Feature: Added some new feature",
-    "Fix: Fixed some issue",
-    "Improvement: Optimized some performance"
+  "version": "1.2.0",
+  "releases": [
+    {
+      "version": "1.2.0",
+      "changelog": [
+        "Add: New feature description",
+        "Fix: Bug fix description",
+        "Improve: Performance improvement"
+      ]
+    },
+    {
+      "version": "1.1.0",
+      "changelog": [...]
+    }
   ]
 }
 ```
@@ -178,6 +177,12 @@ git push origin master
    - Create GitHub Release (tag: `v1.1.0`)
    - Upload all binaries as release assets
    - Include changelog in release notes
+
+## Acknowledgments & License
+
+### Project Origin
+
+This project is based on [itning/reset-s-ui-traffic](https://github.com/itning/reset-s-ui-traffic) with additional features and enhancements
 
 ## License
 

@@ -32,8 +32,8 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
           
-          # Extract changelog and format for release notes
-          CHANGELOG=$(jq -r '.changelog | map("- " + .) | join("\n")' VERSION)
+          # Extract changelog from the latest release (first item in releases array)
+          CHANGELOG=$(jq -r '.releases[0].changelog | map("- " + .) | join("\n")' VERSION)
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT

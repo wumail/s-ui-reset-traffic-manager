@@ -3,7 +3,7 @@
 # One-Click Deployment Script
 # Downloads the reset-traffic-sui management tool
 
-REPO="wumail/reset-s-ui-traffic"
+REPO="wumail/s-ui-reset-traffic-manager"
 SCRIPT_URL="https://raw.githubusercontent.com/$REPO/master/reset-traffic-sui.sh"
 INSTALL_SCRIPT="/usr/local/bin/reset-traffic-sui"
 
