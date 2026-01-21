@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "changelog": [
+    "Initial release with automated monthly traffic reset",
+    "Support for configurable cron schedule via CRON_SCHEDULE environment variable",
+    "HTTP API for manual traffic reset",
+    "Interactive configuration script (reset-traffic-config)",
+    "Support for custom database path and HTTP port configuration",
+    "Pure Go implementation with no CGO dependencies",
+    "Systemd service integration for Linux"
+  ]
+}

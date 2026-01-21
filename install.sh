@@ -48,7 +48,14 @@ EOF
 
     echo "Created Systemd service at $SYSTEMD_PATH"
 
-    # 4. Reload and start
+    # 4. Install config script if available
+    if [ -f "./config.sh" ]; then
+        cp "./config.sh" "/usr/local/bin/reset-traffic-config"
+        chmod +x "/usr/local/bin/reset-traffic-config"
+        echo "Installed configuration script to /usr/local/bin/reset-traffic-config"
+    fi
+
+    # 5. Reload and start
     systemctl daemon-reload
     systemctl enable "$SERVICE_NAME"
     systemctl start "$SERVICE_NAME"
@@ -58,6 +65,10 @@ EOF
     echo "Service Status: $(systemctl is-active $SERVICE_NAME)"
     echo "To check logs, use: journalctl -u $SERVICE_NAME -f"
     echo "HTTP API is now running (default port 52893)."
+    if [ -f "/usr/local/bin/reset-traffic-config" ]; then
+        echo ""
+        echo "To configure the service, run: sudo reset-traffic-config"
+    fi
 }
 
 uninstall_service() {
@@ -75,6 +86,10 @@ uninstall_service() {
     
     if [ -f "$INSTALL_PATH" ]; then
         rm "$INSTALL_PATH"
+    fi
+    
+    if [ -f "/usr/local/bin/reset-traffic-config" ]; then
+        rm "/usr/local/bin/reset-traffic-config"
     fi
 
     echo "Service '$SERVICE_NAME' has been removed."

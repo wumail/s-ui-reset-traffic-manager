@@ -75,6 +75,23 @@ Follow the menu prompts to install the service. The script will create a systemd
 
 ## Usage
 
+### Configuration Management Script
+
+After installation, you can use the interactive configuration script to manage the service:
+
+```bash
+sudo reset-traffic-config
+```
+
+**Configuration Options:**
+- **Option 1**: Modify SUI database path
+- **Option 2**: Modify HTTP API port
+- **Option 3**: Modify cron expression for scheduled tasks
+- **Option 4**: Manually trigger traffic reset
+- **Option 0**: Exit (automatically restarts service if configuration changed)
+
+Each option supports entering `0` to return to the main menu.
+
 ### HTTP API
 
 The service listens on `127.0.0.1:52893` by default. You can manually trigger a reset by sending a request to the following endpoint:
@@ -117,6 +134,40 @@ You can customize the behavior using environment variables in the systemd servic
 | `0 0 1 */3 *` | 1st day of every 3 months at 00:00 |
 
 **Note**: All times are based on Asia/Shanghai timezone (UTC+8).
+
+## Release Process
+
+This project uses an automated release workflow. When the `VERSION` file is updated and pushed to the master branch, GitHub Actions will automatically build and create a new release.
+
+### Creating a New Release
+
+1. Edit the `VERSION` file to update the version number and changelog:
+
+```json
+{
+  "version": "1.1.0",
+  "changelog": [
+    "Feature: Added some new feature",
+    "Fix: Fixed some issue",
+    "Improvement: Optimized some performance"
+  ]
+}
+```
+
+2. Commit and push to master branch:
+
+```bash
+git add VERSION
+git commit -m "chore: bump version to 1.1.0"
+git push origin master
+```
+
+3. GitHub Actions will automatically:
+   - Detect version changes
+   - Build binaries for all platforms
+   - Create GitHub Release (tag: `v1.1.0`)
+   - Upload all binaries as release assets
+   - Include changelog in release notes
 
 ## License
 

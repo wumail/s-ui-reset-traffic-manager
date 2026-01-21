@@ -4,7 +4,7 @@
 SERVICE_NAME="reset-traffic"
 INSTALL_PATH="/usr/local/bin/$SERVICE_NAME"
 SYSTEMD_PATH="/etc/systemd/system/$SERVICE_NAME.service"
-REPO="itning/reset-s-ui-traffic"
+REPO="wumail/reset-s-ui-traffic"
 
 # Check for root privileges
 if [ "$EUID" -ne 0 ]; then

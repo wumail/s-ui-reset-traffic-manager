@@ -1,0 +1,99 @@
+name: Auto Release
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'VERSION'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      
+      - name: Parse VERSION file
+        id: version
+        run: |
+          VERSION=$(jq -r '.version' VERSION)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          
+          # Extract changelog and format for release notes
+          CHANGELOG=$(jq -r '.changelog | map("- " + .) | join("\n")' VERSION)
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Check if release exists
+        id: check_release
+        run: |
+          if git rev-parse "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Release ${{ steps.version.outputs.tag }} already exists, skipping..."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Build binaries
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          mkdir -p build
+          
+          # Define platforms
+          platforms=(
+            "windows/amd64"
+            "windows/arm64"
+            "linux/amd64"
+            "linux/arm64"
+            "darwin/amd64"
+            "darwin/arm64"
+          )
+          
+          for platform in "${platforms[@]}"; do
+            IFS='/' read -r os arch <<< "$platform"
+            output_name="reset-traffic-${os}-${arch}"
+            
+            if [ "$os" = "windows" ]; then
+              output_name="${output_name}.exe"
+            fi
+            
+            echo "Building for $os/$arch..."
+            GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -o "build/$output_name" main.go
+          done
+          
+          ls -lh build/
+      
+      - name: Create Release
+        if: steps.check_release.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
+          body: |
+            ## What's Changed
+            
+            ${{ steps.version.outputs.changelog }}
+            
+            ## Installation
+            
+            Download the appropriate binary for your platform and follow the installation instructions in the README.
+          files: |
+            build/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
