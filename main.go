@@ -18,16 +18,10 @@ const resetLogPath = "/usr/local/s-ui/logs/reset-traffic.log"
 
 // logReset 记录重置日志
 func logReset(resetType string, rowsAffected int64, err error) {
-	// 确保日志目录存在
-	logDir := "/usr/local/s-ui/logs"
-	if mkdirErr := os.MkdirAll(logDir, 0755); mkdirErr != nil {
-		log.Printf("ERROR: Failed to create log directory %s: %v", logDir, mkdirErr)
-		return
-	}
-
+	os.MkdirAll("/usr/local/s-ui/logs", 0755)
+	
 	logFile, fileErr := os.OpenFile(resetLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if fileErr != nil {
-		log.Printf("ERROR: Failed to open log file %s: %v", resetLogPath, fileErr)
 		return
 	}
 	defer logFile.Close()
@@ -41,13 +35,7 @@ func logReset(resetType string, rowsAffected int64, err error) {
 	}
 
 	logLine := fmt.Sprintf("[%s] 重置方式: %s, 状态: %s\n", timestamp, resetType, status)
-	if _, writeErr := logFile.WriteString(logLine); writeErr != nil {
-		log.Printf("ERROR: Failed to write to log file %s: %v", resetLogPath, writeErr)
-		return
-	}
-
-	// 确认日志写入成功
-	log.Printf("Log written successfully to %s", resetLogPath)
+	logFile.WriteString(logLine)
 }
 
 // resetTrafficDB 执行实际的数据库更新操作
@@ -57,12 +45,11 @@ func resetTrafficDB() (int64, error) {
 		dbPath = defaultDBPath
 	}
 
-	// 检查数据库文件是否存在
+	// 检查数据库文件是否存在并打开
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		return 0, fmt.Errorf("database file not found: %s", dbPath)
 	}
 
-	// 打开数据库
 	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		return 0, fmt.Errorf("error opening database: %v", err)
@@ -72,24 +59,22 @@ func resetTrafficDB() (int64, error) {
 	// 设置 SQLite 内部的忙等待超时（双重保险）
 	_, _ = db.Exec("PRAGMA busy_timeout = 5000;")
 
-	var lastErr error
 	// 重试 5 次
+	query := "UPDATE clients SET up = 0, down = 0"
+	var lastErr error
+	
 	for i := 1; i <= 5; i++ {
-		// 执行更新操作
-		query := "UPDATE clients SET up = 0, down = 0"
 		result, err := db.Exec(query)
 		if err == nil {
 			return result.RowsAffected()
 		}
-
 		lastErr = err
-		log.Printf("[DB] Attempt %d failed: %v. Retrying in 5 seconds...", i, err)
-
 		if i < 5 {
 			time.Sleep(5 * time.Second)
 		}
 	}
 
+	log.Printf("[DB] Failed after 5 attempts: %v", lastErr)
 	return 0, fmt.Errorf("error executing update after 5 attempts: %v", lastErr)
 }
 

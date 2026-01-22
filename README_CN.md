@@ -58,10 +58,11 @@ sudo reset-traffic-sui
 ```bash
 # 克隆仓库
 git clone https://github.com/wumail/s-ui-reset-traffic-manager.git
-cd reset-s-ui-traffic
+cd s-ui-reset-traffic-manager
 
-# 为你的平台编译 (例如 Linux AMD64)
-$env:GOOS="linux"; $env:GOARCH="amd64"; $env:CGO_ENABLED=0; go build -o reset-traffic main.go
+# 为你的平台编译
+chmod +x build.sh
+./build.sh
 ```
 
 #### 选项 B: 使用本地二进制部署
@@ -135,16 +136,68 @@ sudo reset-traffic-sui
 
 | Expression | Description |
 | :--- | :--- |
-| `0 0 1 * *` | 1st of every month at 00:00 (default) |
-| `0 0 * * 0` | Every Sunday at 00:00 |
-| `0 0 * * 1` | Every Monday at 00:00 |
-| `0 0 15 * *` | 15th of every month at 00:00 |
-| `0 2 1 * *` | 1st of every month at 02:00 |
-| `0 0 1 */3 *` | 1st day of every 3 months at 00:00 |
+| `0 0 1 * *` | 每月1号 00:00 (默认) |
+| `0 0 * * 0` | 每周日 00:00 |
+| `0 0 * * 1` | 每周一 00:00 |
+| `0 0 15 * *` | 每月15号 00:00 |
+| `0 2 1 * *` | 每月1号 02:00 |
+| `0 0 1 */3 *` | 每3个月的1号 00:00 |
 
-可以通过 `sudo reset-traffic-sui` 选择选项 6 来修改定时任务的 Cron 表达式。
+可以通过 `sudo reset-traffic-sui` 选择选项 8 来修改定时任务的 Cron 表达式。
 
 **注意**: 所有时间均基于 Asia/Shanghai 时区 (东八区)。
+
+## 构建脚本
+
+项目包含针对 Linux/macOS 的优化构建脚本：
+
+### `build.sh`
+
+**构建所有平台:**
+```bash
+chmod +x build.sh
+# 构建所有平台
+./build.sh
+```
+
+**构建指定平台:**
+```bash
+# 查看帮助
+./build.sh --help
+
+# 只构建 Linux AMD64
+./build.sh linux/amd64
+
+# 构建 Linux AMD64 和 ARM64
+./build.sh linux/amd64 linux/arm64
+
+# 构建所有 Windows 平台
+./build.sh windows/amd64 windows/arm64
+```
+
+**支持的平台:**
+- `windows/amd64` - Windows 64位 (Intel/AMD)
+- `windows/arm64` - Windows ARM64
+- `linux/amd64` - Linux 64位 (Intel/AMD)
+- `linux/arm64` - Linux ARM64
+- `darwin/amd64` - macOS Intel
+- `darwin/arm64` - macOS Apple Silicon
+
+**安装 UPX (可选):**
+
+本地构建时，安装 UPX 可以获得更小的二进制文件:
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install upx
+```
+
+**macOS:**
+```bash
+brew install upx
+```
+
+使用 UPX 后，二进制文件可以从 ~7MB 压缩到 ~2-3MB。
 
 ## 发布流程
 
@@ -178,14 +231,14 @@ sudo reset-traffic-sui
 
 ```bash
 git add .
-git commit -m "chore: bump version to 1.1.0"
+git commit -m "chore: bump version to 1.2.0"
 git push origin master
 ```
 
 3. GitHub Actions 会自动:
    - 检测版本号变化
-   - 构建所有平台的二进制文件
-   - 创建 GitHub Release (标签: `v1.1.0`)
+   - 使用优化标志构建所有平台的二进制文件
+   - 创建 GitHub Release (标签: `v1.2.0`)
    - 上传所有二进制文件作为发布资产
    - 附带版本改动信息
 

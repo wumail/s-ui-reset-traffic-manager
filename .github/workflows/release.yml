@@ -72,9 +72,33 @@ jobs:
             fi
             
             echo "Building for $os/$arch..."
-            GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -o "build/$output_name" main.go
+            GOOS=$os GOARCH=$arch CGO_ENABLED=0 go build -ldflags="-s -w" -o "build/$output_name" main.go
           done
           
+          ls -lh build/
+      
+      - name: Install UPX
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y upx
+      
+      - name: Compress binaries with UPX
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          echo "Compressing binaries with UPX..."
+          
+          # Compress Linux binaries (most compatible)
+          upx --best --lzma build/reset-traffic-linux-amd64 || true
+          upx --best --lzma build/reset-traffic-linux-arm64 || true
+          
+          # Compress Windows AMD64 (ARM64 may have compatibility issues)
+          upx --best --lzma build/reset-traffic-windows-amd64.exe || true
+          
+          # Skip macOS (UPX has issues with macOS binaries)
+          # Skip Windows ARM64 (may have compatibility issues)
+          
+          echo "Compression complete!"
           ls -lh build/
       
       - name: Create Release

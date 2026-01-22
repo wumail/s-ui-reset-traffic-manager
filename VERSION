@@ -1,6 +1,24 @@
 {
-  "version": "1.0.3",
+  "version": "1.0.4",
   "releases": [
+    {
+      "version": "1.0.4",
+      "changelog": [
+        "Optimize: Reduce main.go code by 16 lines (-9.6%) through simplified logging and error handling",
+        "Optimize: Reduce reset-traffic-sui.sh code by 60 lines (-7.9%) by extracting common functions",
+        "Optimize: Add compiler optimization flags -ldflags='-s -w' to reduce binary size by 20-30%",
+        "Optimize: Integrate UPX compression in GitHub Actions to reduce binary size by additional 60-70%",
+        "Add: Platform-specific build support in build.sh (e.g., ./build.sh linux/amd64)",
+        "Add: Help option for build.sh (./build.sh --help)",
+        "Improve: Simplify build process - remove build.ps1, keep only build.sh",
+        "Improve: Remove unnecessary sleep calls in management script for faster response",
+        "Improve: Extract confirm_action() function to reduce code duplication",
+        "Improve: Simplify validation functions (validate_port, validate_cron)",
+        "Fix: Remove verbose retry logging - only log final failure",
+        "Docs: Update README with new build script usage and platform-specific examples",
+        "Release: GitHub releases now include UPX-compressed binaries (Linux/Windows AMD64)"
+      ]
+    },
     {
       "version": "1.0.3",
       "changelog": [

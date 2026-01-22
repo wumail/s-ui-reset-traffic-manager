@@ -5,7 +5,7 @@
 
 set -e
 
-SCRIPT_VERSION="1.0.3"
+SCRIPT_VERSION="1.0.4"
 REPO="wumail/s-ui-reset-traffic-manager"
 
 SCRIPT_INSTALL_PATH="/usr/local/bin/reset-traffic-sui"
@@ -86,23 +86,24 @@ Environment=\"${var_name}=${var_value}\"" "$SERVICE_FILE"
     echo -e "${GREEN}✓ 配置已更新${NC}"
 }
 
+# 通用确认函数
+confirm_action() {
+    local prompt=$1
+    echo -n "$prompt (y/n, 输入 0 返回): "
+    read confirm
+    [ "$confirm" = "0" ] && return 2
+    [ "$confirm" = "y" ] || [ "$confirm" = "Y" ] && return 0
+    return 1
+}
+
 # 验证端口号
 validate_port() {
-    local port=$1
-    if [[ ! "$port" =~ ^[0-9]+$ ]] || [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
-        return 1
-    fi
-    return 0
+    [[ "$1" =~ ^[0-9]+$ ]] && [ "$1" -ge 1 ] && [ "$1" -le 65535 ]
 }
 
 # 验证 cron 表达式 (基本验证)
 validate_cron() {
-    local cron=$1
-    local field_count=$(echo "$cron" | awk '{print NF}')
-    if [ "$field_count" -ne 5 ]; then
-        return 1
-    fi
-    return 0
+    [ $(echo "$1" | awk '{print NF}') -eq 5 ]
 }
 
 # 显示主菜单
@@ -161,19 +162,11 @@ option_install_service() {
     
     if [ -f "$SERVICE_FILE" ]; then
         echo -e "${YELLOW}警告: 服务已安装${NC}"
-        echo -n "是否重新安装? (y/n, 输入 0 返回): "
-        read confirm
-        if [ "$confirm" = "0" ]; then
-            return
-        fi
-        if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
-            return
-        fi
+        confirm_action "是否重新安装?" || return
     fi
     
     echo "1. 检测系统架构..."
     if ! detect_arch; then
-        sleep 3
         return
     fi
     echo -e "   架构: ${GREEN}$ARCH${NC}, 二进制文件: ${GREEN}$BINARY_NAME${NC}"
@@ -183,7 +176,6 @@ option_install_service() {
     
     if [ -z "$LATEST_TAG" ]; then
         echo -e "${RED}错误: 无法获取最新版本信息${NC}"
-        sleep 3
         return
     fi
     echo -e "   最新版本: ${GREEN}$LATEST_TAG${NC}"
@@ -194,13 +186,11 @@ option_install_service() {
     
     if ! curl -L "$DOWNLOAD_URL" -o "$TMP_BINARY"; then
         echo -e "${RED}错误: 下载失败${NC}"
-        sleep 3
         return
     fi
     
     if [ ! -s "$TMP_BINARY" ]; then
         echo -e "${RED}错误: 下载的文件为空${NC}"
-        sleep 3
         return
     fi
     
@@ -247,23 +237,14 @@ option_update_service() {
     if [ ! -f "$SERVICE_FILE" ]; then
         echo -e "${RED}错误: 服务未安装${NC}"
         echo "请先使用选项 1 安装服务"
-        sleep 3
         return
     fi
     
-    echo -n "确认更新到最新版本? (y/n, 输入 0 返回): "
-    read confirm
-    if [ "$confirm" = "0" ]; then
-        return
-    fi
-    if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
-        return
-    fi
+    confirm_action "确认更新到最新版本?" || return
     
     echo ""
     echo "1. 检测系统架构..."
     if ! detect_arch; then
-        sleep 3
         return
     fi
     echo -e "   架构: ${GREEN}$ARCH${NC}"
@@ -273,7 +254,6 @@ option_update_service() {
     
     if [ -z "$LATEST_TAG" ]; then
         echo -e "${RED}错误: 无法获取最新版本信息${NC}"
-        sleep 3
         return
     fi
     echo -e "   最新版本: ${GREEN}$LATEST_TAG${NC}"
@@ -284,7 +264,6 @@ option_update_service() {
     
     if ! curl -L "$DOWNLOAD_URL" -o "$TMP_BINARY"; then
         echo -e "${RED}错误: 下载失败${NC}"
-        sleep 3
         return
     fi
     
@@ -314,19 +293,11 @@ option_uninstall_service() {
     
     if [ ! -f "$SERVICE_FILE" ]; then
         echo -e "${YELLOW}服务未安装${NC}"
-        sleep 2
         return
     fi
     
     echo -e "${RED}警告: 此操作将完全删除 reset-traffic 服务${NC}"
-    echo -n "确认卸载? (y/n, 输入 0 返回): "
-    read confirm
-    if [ "$confirm" = "0" ]; then
-        return
-    fi
-    if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
-        return
-    fi
+    confirm_action "确认卸载?" || return
     
     echo ""
     echo "1. 停止服务..."
@@ -359,14 +330,12 @@ option_pause_service() {
     
     if [ ! -f "$SERVICE_FILE" ]; then
         echo -e "${RED}错误: 服务未安装${NC}"
-        sleep 2
         return
     fi
     
     local status=$(systemctl is-active $SERVICE_NAME 2>/dev/null || echo "未运行")
     if [ "$status" != "active" ]; then
         echo -e "${YELLOW}服务当前未运行${NC}"
-        sleep 2
         return
     fi
     
@@ -390,14 +359,12 @@ option_resume_service() {
     
     if [ ! -f "$SERVICE_FILE" ]; then
         echo -e "${RED}错误: 服务未安装${NC}"
-        sleep 2
         return
     fi
     
     local status=$(systemctl is-active $SERVICE_NAME 2>/dev/null || echo "未运行")
     if [ "$status" = "active" ]; then
         echo -e "${YELLOW}服务已在运行中${NC}"
-        sleep 2
         return
     fi
     
@@ -422,7 +389,6 @@ option_modify_db_path() {
     
     if [ ! -f "$SERVICE_FILE" ]; then
         echo -e "${RED}错误: 服务未安装${NC}"
-        sleep 2
         return
     fi
     
@@ -438,21 +404,15 @@ option_modify_db_path() {
     
     if [ -z "$new_path" ]; then
         echo -e "${RED}错误: 路径不能为空${NC}"
-        sleep 2
         return
     fi
     
     if [ ! -f "$new_path" ]; then
         echo -e "${YELLOW}警告: 文件不存在: $new_path${NC}"
-        echo -n "是否继续? (y/n): "
-        read confirm
-        if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
-            return
-        fi
+        confirm_action "是否继续?" || return
     fi
     
     set_env_value "SUI_DB_PATH" "$new_path"
-    sleep 2
 }
 
 # 修改 HTTP 端口
@@ -463,7 +423,6 @@ option_modify_port() {
     
     if [ ! -f "$SERVICE_FILE" ]; then
         echo -e "${RED}错误: 服务未安装${NC}"
-        sleep 2
         return
     fi
     
@@ -479,12 +438,10 @@ option_modify_port() {
     
     if ! validate_port "$new_port"; then
         echo -e "${RED}错误: 无效的端口号 (必须是 1-65535 之间的数字)${NC}"
-        sleep 2
         return
     fi
     
     set_env_value "PORT" "$new_port"
-    sleep 2
 }
 
 # 修改 Cron 表达式
@@ -495,7 +452,6 @@ option_modify_cron() {
     
     if [ ! -f "$SERVICE_FILE" ]; then
         echo -e "${RED}错误: 服务未安装${NC}"
-        sleep 2
         return
     fi
     
@@ -517,18 +473,15 @@ option_modify_cron() {
     
     if [ -z "$new_cron" ]; then
         echo -e "${RED}错误: Cron 表达式不能为空${NC}"
-        sleep 2
         return
     fi
     
     if ! validate_cron "$new_cron"; then
         echo -e "${RED}错误: 无效的 Cron 表达式 (应包含5个字段)${NC}"
-        sleep 2
         return
     fi
     
     set_env_value "CRON_SCHEDULE" "$new_cron"
-    sleep 2
 }
 
 # 手动重置流量
@@ -539,7 +492,6 @@ option_manual_reset() {
     
     if [ ! -f "$SERVICE_FILE" ]; then
         echo -e "${RED}错误: 服务未安装${NC}"
-        sleep 2
         return
     fi
     
@@ -626,7 +578,6 @@ option_update_script() {
     
     if [ -z "$latest_version" ]; then
         echo -e "${RED}错误: 无法获取最新版本信息${NC}"
-        sleep 3
         return
     fi
     
@@ -635,18 +586,10 @@ option_update_script() {
     
     if [ "$latest_version" = "$SCRIPT_VERSION" ]; then
         echo -e "${GREEN}✓ 已是最新版本${NC}"
-        sleep 2
         return
     fi
     
-    echo -n "确认更新到 v${latest_version}? (y/n, 输入 0 返回): "
-    read confirm
-    if [ "$confirm" = "0" ]; then
-        return
-    fi
-    if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
-        return
-    fi
+    confirm_action "确认更新到 v${latest_version}?" || return
     
     echo ""
     echo "正在下载最新版本..."
@@ -656,13 +599,11 @@ option_update_script() {
     
     if ! curl -fsSL "$DOWNLOAD_URL" -o "$TMP_SCRIPT"; then
         echo -e "${RED}错误: 下载失败${NC}"
-        sleep 3
         return
     fi
     
     if [ ! -s "$TMP_SCRIPT" ]; then
         echo -e "${RED}错误: 下载的文件为空${NC}"
-        sleep 3
         return
     fi
     
